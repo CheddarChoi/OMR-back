@@ -3,8 +3,11 @@ module.exports = (sequelize, Sequelize) => {
     name: {
       type: Sequelize.STRING,
     },
-    time: {
-      type: Sequelize.STRING,
+    startTime: {
+      type: Sequelize.TIME,
+    },
+    endTime: {
+      type: Sequelize.TIME,
     },
     published: {
       type: Sequelize.BOOLEAN,

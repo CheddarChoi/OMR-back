@@ -15,7 +15,8 @@ exports.create = (req, res) => {
   // Create a Schedule
   const schedule = {
     name: req.body.name,
-    time: req.body.time,
+    startTime: req.body.startTime,
+    endTime: req.body.endTime,
     published: req.body.published ? req.body.published : false,
   };
 
