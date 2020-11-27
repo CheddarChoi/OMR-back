@@ -1,14 +1,15 @@
-const crypto = require('crypto');
+const crypto = require("crypto");
 
 exports.hashed = (data, salt) => {
-  const hash = crypto.createHmac('sha512', salt);
+  console.log(salt);
+  const hash = crypto.createHmac("sha512", salt);
   hash.update(data);
-  return hash.digest('hex');
+  return hash.digest("hex");
 };
 
 exports.getRandomString = (length) => {
   return crypto
     .randomBytes(Math.ceil(length / 2))
-    .toString('hex') // convert to hexadecimal format
+    .toString("hex") // convert to hexadecimal format
     .slice(0, length); // return first 16 characters
 };

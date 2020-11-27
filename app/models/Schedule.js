@@ -1,18 +1,27 @@
-module.exports = (sequelize, Sequelize) => {
+module.exports = (sequelize, DataTypes) => {
   const Schedule = sequelize.define("schedule", {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
     name: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
     startTime: {
-      type: Sequelize.TIME,
+      type: DataTypes.TIME,
     },
     endTime: {
-      type: Sequelize.TIME,
+      type: DataTypes.TIME,
     },
     published: {
-      type: Sequelize.BOOLEAN,
+      type: DataTypes.BOOLEAN,
     },
   });
+  Schedule.associate = function (models) {
+    // associations can be defined here
+    Schedule.belongsTo(models.User);
+  };
 
   return Schedule;
 };

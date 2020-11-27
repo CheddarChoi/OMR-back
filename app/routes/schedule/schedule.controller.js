@@ -1,52 +1,64 @@
-const db = require("../../../models");
-const Schedule = db.schedules;
+const db = require("../../models");
+const Schedule = db.schedule;
 const Op = db.Sequelize.Op;
 
+const { checkAndGetUserId } = require("../../utils/auth");
+
 // Create and Save a new Schedule
-exports.create = (req, res) => {
-  // Validate request
+exports.create = async (ctx) => {
+  const UserId = await checkAndGetUserId(ctx);
+  console.log(UserId);
+  const req = ctx.request;
+
   if (!req.body.name) {
-    res.status(400).send({
+    ctx.status = 400;
+    ctx.body = {
       message: "Content can not be empty!",
-    });
+    };
     return;
   }
 
-  // Create a Schedule
   const schedule = {
     name: req.body.name,
     startTime: req.body.startTime,
     endTime: req.body.endTime,
     published: req.body.published ? req.body.published : false,
+    id: UserId,
   };
 
   // Save Schedule in the database
-  Schedule.create(schedule)
+  await Schedule.create(schedule)
     .then((data) => {
-      res.send(data);
+      ctx.body = data;
+      console.log("success");
     })
     .catch((err) => {
-      res.status(500).send({
+      console.log("error");
+      ctx.status = 500;
+      ctx.body = {
         message:
           err.message || "Some error occurred while creating the schedule.",
-      });
+      };
     });
 };
 
 // Retrieve all Schedules from the database.
-exports.findAll = (req, res) => {
-  const name = req.query.name;
+exports.findAll = (ctx) => {
+  const name = ctx.request.query.name;
   var condition = name ? { name: { [Op.like]: `%${name}%` } } : null;
 
   Schedule.findAll({ where: condition })
     .then((data) => {
-      res.send(data);
+      console.log(data);
+      ctx.body = data;
+      ctx.status = 204;
     })
     .catch((err) => {
-      res.status(500).send({
+      ctx.status = 500;
+      ctx.body = {
         message:
           err.message || "Some error occurred while retrieving schedules.",
-      });
+      };
     });
 };
 

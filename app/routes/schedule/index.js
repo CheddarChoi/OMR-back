@@ -1,28 +1,15 @@
-module.exports = (app) => {
-  const schedules = require("../controllers/schedule.controller.js");
+const Router = require("koa-router");
 
-  var router = require("express").Router();
+const schedule = new Router();
 
-  // Create a new Tutorial
-  router.post("/", schedules.create);
+const schedulesCtrl = require("./schedule.controller");
 
-  // Retrieve all schedules
-  router.get("/", schedules.findAll);
+schedule.post("/", schedulesCtrl.create);
+schedule.get("/list", schedulesCtrl.findAll);
+schedule.get("/published", schedulesCtrl.findAllPublished);
+schedule.get("/:id", schedulesCtrl.findOne);
+schedule.put("/:id", schedulesCtrl.update);
+schedule.delete("/:id", schedulesCtrl.delete);
+schedule.delete("/", schedulesCtrl.deleteAll);
 
-  // Retrieve all published schedules
-  router.get("/published", schedules.findAllPublished);
-
-  // Retrieve a single Tutorial with id
-  router.get("/:id", schedules.findOne);
-
-  // Update a Tutorial with id
-  router.put("/:id", schedules.update);
-
-  // Delete a Tutorial with id
-  router.delete("/:id", schedules.delete);
-
-  // Delete all schedules
-  router.delete("/", schedules.deleteAll);
-
-  app.use("/api/schedules", router);
-};
+module.exports = schedule;

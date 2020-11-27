@@ -1,7 +1,8 @@
 const db = require("../../models");
 const User = db.users;
 
-const jwt = require("jsonwebtoken");
+const { generateToken } = require("../../utils/jwt");
+const { hashed, getRandomString } = require("../../utils/crypto");
 
 /*
     POST /api/auth/register
@@ -11,45 +12,23 @@ const jwt = require("jsonwebtoken");
     }
 */
 exports.register = async (ctx) => {
-  console.log(ctx.request);
-  const { name, username, password } = ctx.request.body;
-  let newUser = null;
-
-  // create a new user if does not exist
-  const create = (user) => {
-    if (user) {
-      throw new Error("username exists");
-    } else {
-      return User.create({
-        name: name,
-        username: username,
-        password: password,
-      });
-    }
-  };
-
-  // respond to the client
-  const respond = () => {
-    ctx.response.json({
-      message: "Registered successfully",
-    });
-    ctx.response.body = newUser;
-  };
-
-  // run when there is an error (username exists)
-  const onError = (error) => {
-    ctx.response.status(409).json({
-      message: error.message,
-    });
-  };
-
-  // check username duplication
-  User.findOne({
+  const { name, username, password, key } = ctx.request.body;
+  const res = await User.findOne({
     where: { username },
-  })
-    .then(create)
-    .then(respond)
-    .catch(onError);
+    attributes: ["name", "password", "salt"],
+  });
+  ctx.assert(!res, 400, "The username is already taken.");
+  // Generate random string of length 16
+  const salt = getRandomString(16);
+  const value = hashed(password, salt);
+  const newUser = await User.create({
+    name,
+    username,
+    salt,
+    password: value,
+  });
+
+  ctx.response.body = newUser;
 };
 
 /*
@@ -60,67 +39,21 @@ exports.register = async (ctx) => {
     }
 */
 
-exports.login = (req, res) => {
-  const { username, password } = req.body;
-  const secret = req.app.get("jwt-secret");
-
-  // Check user info & generate jwt
-  const check = (user) => {
-    if (!user) {
-      throw new Error("No user!");
-    } else {
-      if (user.password === password) {
-        const p = new Promise((resolve, reject) => {
-          jwt.sign(
-            {
-              _id: user._id,
-              username: user.username,
-              admin: user.admin,
-            },
-            secret,
-            {
-              expiresIn: "7d",
-            },
-            (err, token) => {
-              if (err) reject(err);
-              resolve(token);
-            }
-          );
-        });
-        return p;
-      } else {
-        throw new Error("Login Failed!");
-      }
-    }
-  };
-
-  const respond = (token) => {
-    res.json({
-      message: "Logged in successfully",
-      token,
-    });
-    ctx.cookies.set(process.env.ACCESS_TOKEN, token, {
-      maxAge: 1000 * 60 * 60 * 24,
-      overwrite: true,
-    });
-    ctx.status = 204;
-  };
-
-  // error occured
-  const onError = (error) => {
-    res.status(403).json({
-      message: error.message,
-    });
-  };
-
-  // find the user
-  User.findOne({
+exports.login = async (ctx) => {
+  const { username, password } = ctx.request.body;
+  const res = await User.findOne({
     where: { username },
-    attributes: { include: ["name", "password", "salt"] },
-  })
-    .then((res) => check(res))
-    .then(respond)
-    .catch(onError);
+    attributes: { include: ["username", "password", "salt"] },
+  });
+  ctx.assert(res, 400, "The account does not exist.");
+  const value = hashed(password, res.salt);
+  ctx.assert(value === res.password, 401, "The password is incorrect.");
+  const token = await generateToken({ id: res.id });
+  ctx.cookies.set(process.env.ACCESS_TOKEN, token, {
+    maxAge: 1000 * 60 * 60 * 24,
+    overwrite: true,
+  });
+  ctx.status = 204;
 };
 
 /*
@@ -130,9 +63,9 @@ exports.login = (req, res) => {
 exports.check = async (ctx) => {
   ctx.assert(ctx.request.user, 401, "401: Unauthorized user");
   const { id } = ctx.request.user;
-  const user = await models.User.findOne({
+  const user = await User.findOne({
     where: { id },
-    attributes: { include: ["email", "password", "salt"] },
+    attributes: { include: ["username", "password", "salt"] },
   });
   ctx.assert(user, 401, "401: Unauthorized user");
   ctx.body = { id, name: user.name };

@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
-const jwtSecret = process.env.JWT_SECRET || 'not-a-secret-anymore';
+const jwtSecret = process.env.JWT_SECRET || "not-a-secret-anymore";
 
 const generateToken = async (payload) => {
   const sign = new Promise((resolve, reject) => {
@@ -8,7 +8,7 @@ const generateToken = async (payload) => {
       payload,
       jwtSecret,
       {
-        expiresIn: '7d',
+        expiresIn: "7d",
       },
       (error, token) => {
         if (error) reject(error);
@@ -45,7 +45,7 @@ exports.jwtMiddleware = async (ctx, next) => {
     }
     ctx.request.user = decoded;
   } catch (e) {
-    ctx.request.user = 'ERROR';
+    ctx.request.user = "ERROR";
   }
 
   return next();
