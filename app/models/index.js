@@ -20,7 +20,7 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
 // db.tutorials = require("./tutorial.model.js")(sequelize, Sequelize);
-db.schedules = require("./schedule.model.js")(sequelize, Sequelize);
-db.schedules = require("./User.js")(sequelize, Sequelize);
+db.schedules = require("./Schedule.js")(sequelize, Sequelize);
+db.users = require("./User.js")(sequelize, Sequelize);
 
 module.exports = db;
