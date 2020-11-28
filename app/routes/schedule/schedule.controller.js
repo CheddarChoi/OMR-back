@@ -7,7 +7,6 @@ const { checkAndGetUserId } = require("../../utils/auth");
 // Create and Save a new Schedule
 exports.create = async (ctx) => {
   const UserId = await checkAndGetUserId(ctx);
-  console.log(UserId);
   const req = ctx.request;
 
   if (!req.body.name) {
@@ -18,12 +17,16 @@ exports.create = async (ctx) => {
     return;
   }
 
+  console.log(req.body);
+
   const schedule = {
     name: req.body.name,
+    shortName: req.body.shortName,
     startTime: req.body.startTime,
     endTime: req.body.endTime,
+    color: req.body.color,
     published: req.body.published ? req.body.published : false,
-    id: UserId,
+    UserId: UserId,
   };
 
   // Save Schedule in the database
@@ -43,15 +46,14 @@ exports.create = async (ctx) => {
 };
 
 // Retrieve all Schedules from the database.
-exports.findAll = (ctx) => {
+exports.findAll = async (ctx) => {
   const name = ctx.request.query.name;
   var condition = name ? { name: { [Op.like]: `%${name}%` } } : null;
 
-  Schedule.findAll({ where: condition })
+  await Schedule.findAll({ where: condition })
     .then((data) => {
       console.log(data);
       ctx.body = data;
-      ctx.status = 204;
     })
     .catch((err) => {
       ctx.status = 500;

@@ -5,7 +5,15 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
+    UserId: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      foreignKey: true,
+    },
     name: {
+      type: DataTypes.STRING,
+    },
+    shortName: {
       type: DataTypes.STRING,
     },
     startTime: {
@@ -13,6 +21,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     endTime: {
       type: DataTypes.TIME,
+    },
+    color: {
+      type: DataTypes.STRING,
     },
     published: {
       type: DataTypes.BOOLEAN,
