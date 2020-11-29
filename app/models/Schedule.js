@@ -25,9 +25,6 @@ module.exports = (sequelize, DataTypes) => {
     color: {
       type: DataTypes.STRING,
     },
-    published: {
-      type: DataTypes.BOOLEAN,
-    },
   });
   Schedule.associate = function (models) {
     // associations can be defined here

@@ -25,7 +25,6 @@ exports.create = async (ctx) => {
     startTime: req.body.startTime,
     endTime: req.body.endTime,
     color: req.body.color,
-    published: req.body.published ? req.body.published : false,
     UserId: UserId,
   };
 
@@ -45,12 +44,12 @@ exports.create = async (ctx) => {
     });
 };
 
-// Retrieve all Schedules from the database.
+// Retrieve all Schedules corresponding to the current user from the database.
 exports.findAll = async (ctx) => {
   const name = ctx.request.query.name;
-  var condition = name ? { name: { [Op.like]: `%${name}%` } } : null;
+  const UserId = await checkAndGetUserId(ctx);
 
-  await Schedule.findAll({ where: condition })
+  await Schedule.findAll({ where: { UserId } })
     .then((data) => {
       console.log(data);
       ctx.body = data;
@@ -65,97 +64,92 @@ exports.findAll = async (ctx) => {
 };
 
 // Find a single Schedule with an id
-exports.findOne = (req, res) => {
+exports.findOne = async (ctx) => {
+  const req = ctx.request;
   const id = req.params.id;
 
-  Schedule.findByPk(id)
+  await Schedule.findByPk(id)
     .then((data) => {
-      res.send(data);
+      ctx.body = data;
     })
     .catch((err) => {
-      res.status(500).send({
+      ctx.status = 500;
+      ctx.body = {
         message: "Error retrieving schedule with id=" + id,
-      });
+      };
     });
 };
 
 // Update a Schedule by the id in the request
-exports.update = (req, res) => {
+exports.update = async (ctx) => {
+  const req = ctx.request;
   const id = req.params.id;
 
-  Schedule.update(req.body, {
+  await Schedule.update(req.body, {
     where: { id: id },
   })
     .then((num) => {
       if (num == 1) {
-        res.send({
+        ctx.body = {
           message: "Schedule was updated successfully.",
-        });
+        };
       } else {
-        res.send({
+        ctx.body = {
           message: `Cannot update Schedule with id=${id}. Maybe Schedule was not found or req.body is empty!`,
-        });
+        };
       }
     })
     .catch((err) => {
-      res.status(500).send({
+      ctx.status = 500;
+      ctx.body = {
         message: "Error updating Schedule with id=" + id,
-      });
+      };
     });
 };
 
 // Delete a Schedule with the specified id in the request
-exports.delete = (req, res) => {
+exports.delete = async (ctx) => {
+  const req = ctx.request;
   const id = req.params.id;
 
-  Schedule.destroy({
+  await Schedule.destroy({
     where: { id: id },
   })
     .then((num) => {
       if (num == 1) {
-        res.send({
+        ctx.body = {
           message: "Schedule was deleted successfully!",
-        });
+        };
       } else {
-        res.send({
+        ctx.body = {
           message: `Cannot delete Schedule with id=${id}. Maybe Schedule was not found!`,
-        });
+        };
       }
     })
     .catch((err) => {
-      res.status(500).send({
+      ctx.status = 500;
+      ctx.body = {
         message: "Could not delete Schedule with id=" + id,
-      });
+      };
     });
 };
 
 // Delete all Schedules from the database.
-exports.deleteAll = (req, res) => {
-  Schedule.destroy({
-    where: {},
+exports.deleteAll = async (ctx) => {
+  const UserId = await checkAndGetUserId(ctx);
+
+  await Schedule.destroy({
+    where: { UserId },
     truncate: false,
   })
     .then((nums) => {
-      res.send({ message: `${nums} Schedules were deleted successfully!` });
+      ctx.body = { message: `${nums} Schedules were deleted successfully!` };
     })
     .catch((err) => {
-      res.status(500).send({
+      ctx.status = 500;
+      ctx.body = {
         message:
           err.message || "Some error occurred while removing all schedules.",
-      });
-    });
-};
-
-// Find all published Schedules
-exports.findAllPublished = (req, res) => {
-  Schedule.findAll({ where: { published: true } })
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving schedules.",
-      });
+      };
     });
 };

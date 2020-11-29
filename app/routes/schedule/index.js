@@ -6,7 +6,6 @@ const schedulesCtrl = require("./schedule.controller");
 
 schedule.post("/", schedulesCtrl.create);
 schedule.get("/", schedulesCtrl.findAll);
-schedule.get("/published", schedulesCtrl.findAllPublished);
 schedule.get("/:id", schedulesCtrl.findOne);
 schedule.put("/:id", schedulesCtrl.update);
 schedule.delete("/:id", schedulesCtrl.delete);
