@@ -29,6 +29,7 @@
     "koa-logger": "^3.2.1",
     "koa-router": "^10.0.0",
     "module-alias": "^2.2.2",
+    "moment": "^2.29.1",
     "mysql2": "^2.2.5",
     "nodemon": "^2.0.6",
     "sequelize": "^6.3.5"

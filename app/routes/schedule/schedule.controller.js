@@ -3,6 +3,9 @@ const Schedule = db.schedule;
 const Op = db.Sequelize.Op;
 
 const { checkAndGetUserId } = require("../../utils/auth");
+const { timeLater } = require("../../utils/time");
+
+const datePadding = "2018-02-23T";
 
 // Create and Save a new Schedule
 exports.create = async (ctx) => {
@@ -27,6 +30,27 @@ exports.create = async (ctx) => {
     color: req.body.color,
     UserId: UserId,
   };
+
+  // Check if overlaps with other schedules
+  const originalSchedules = await Schedule.findAll({ where: { UserId } });
+  let valid = true;
+  originalSchedules.map((originalSchedule) => {
+    console.log(originalSchedule);
+    console.log(schedule);
+    if (
+      (timeLater(originalSchedule.endTime, schedule.startTime) &&
+        timeLater(schedule.startTime, originalSchedule.startTime)) ||
+      (timeLater(originalSchedule.startTime, schedule.startTime) &&
+        timeLater(schedule.endTime, originalSchedule.startTime))
+    )
+      valid = false;
+  });
+
+  ctx.assert(
+    valid,
+    400,
+    "New schedule overlaps with other schedule. Please check the time of the new schedule."
+  );
 
   // Save Schedule in the database
   await Schedule.create(schedule)
