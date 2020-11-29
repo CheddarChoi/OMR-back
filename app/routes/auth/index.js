@@ -9,6 +9,7 @@ user.post("/login", authCtrl.login);
 user.get("/check", authCtrl.check);
 user.get("/logout", authCtrl.logout);
 user.post("/changePublic", authCtrl.public);
-user.post("/chanagePrivate", authCtrl.private);
+user.post("/changePrivate", authCtrl.private);
+user.get("/publicity", authCtrl.checkPublicity);
 
 module.exports = user;
