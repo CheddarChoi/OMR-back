@@ -26,6 +26,7 @@ exports.register = async (ctx) => {
     username,
     salt,
     password: value,
+    public: false,
   });
 
   ctx.response.body = newUser;
@@ -73,5 +74,29 @@ exports.check = async (ctx) => {
 
 exports.logout = async (ctx) => {
   ctx.cookies.set(process.env.ACCESS_TOKEN, null);
+  ctx.status = 204;
+};
+
+exports.public = async (ctx) => {
+  ctx.assert(ctx.request.user, 401, "401: Unauthorized user");
+  const { id } = ctx.request.user;
+  console.log(id);
+  const user = await User.findOne({
+    where: { id },
+  });
+  user.public = true;
+  await user.save();
+  ctx.status = 204;
+};
+
+exports.private = async (ctx) => {
+  ctx.assert(ctx.request.user, 401, "401: Unauthorized user");
+  const { id } = ctx.request.user;
+  console.log(id);
+  const user = await User.findOne({
+    where: { id },
+  });
+  user.public = false;
+  await user.save();
   ctx.status = 204;
 };
