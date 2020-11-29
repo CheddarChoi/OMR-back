@@ -1,5 +1,5 @@
 const db = require("../../models");
-const Schedule = db.schedule;
+const Schedule = db.Schedule;
 const Op = db.Sequelize.Op;
 
 const { checkAndGetUserId } = require("../../utils/auth");
@@ -100,6 +100,23 @@ exports.findOne = async (ctx) => {
       ctx.status = 500;
       ctx.body = {
         message: "Error retrieving schedule with id=" + id,
+      };
+    });
+};
+
+exports.findByUser = async (ctx) => {
+  const UserId = ctx.request.params.userid;
+
+  await Schedule.findAll({ where: { UserId } })
+    .then((data) => {
+      console.log(data);
+      ctx.body = data;
+    })
+    .catch((err) => {
+      ctx.status = 500;
+      ctx.body = {
+        message:
+          err.message || "Some error occurred while retrieving schedules.",
       };
     });
 };

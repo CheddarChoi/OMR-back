@@ -1,5 +1,5 @@
 const db = require("../../models");
-const User = db.users;
+const User = db.User;
 
 const { generateToken } = require("../../utils/jwt");
 const { hashed, getRandomString } = require("../../utils/crypto");
@@ -108,4 +108,30 @@ exports.checkPublicity = async (ctx) => {
     where: { id },
   });
   ctx.body = user.public;
+};
+
+exports.allPublicUser = async (ctx) => {
+  // ctx.assert(ctx.request.user, 401, "401: Unauthorized user");
+
+  const data = await User.findAll({
+    where: { public: true },
+    attributes: { include: ["username", "id"] },
+    include: db.Schedule,
+  });
+
+  ctx.body = data;
+
+  // data.map((user) => {
+  //   await db.schedule.findAll({ where: { UserId: user.id } })
+  //   .then((data) => {
+  //     console.log(data);
+  //     ctx.body = data;
+  //   })
+  //   .catch((err) => {
+  //     ctx.status = 500;
+  //     ctx.body = {
+  //       message:
+  //         err.message || "Some error occurred while retrieving schedules.",
+  //     };
+  // })
 };

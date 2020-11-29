@@ -11,5 +11,6 @@ user.get("/logout", authCtrl.logout);
 user.post("/changePublic", authCtrl.public);
 user.post("/changePrivate", authCtrl.private);
 user.get("/publicity", authCtrl.checkPublicity);
+user.get("/allPublicUser", authCtrl.allPublicUser);
 
 module.exports = user;
