@@ -5,8 +5,6 @@ const Op = db.Sequelize.Op;
 const { checkAndGetUserId } = require("../../utils/auth");
 const { timeLater } = require("../../utils/time");
 
-const datePadding = "2018-02-23T";
-
 // Create and Save a new Schedule
 exports.create = async (ctx) => {
   const UserId = await checkAndGetUserId(ctx);
@@ -30,6 +28,14 @@ exports.create = async (ctx) => {
     color: req.body.color,
     UserId: UserId,
   };
+
+  console.log("hi" + timeLater(schedule.endTime, schedule.startTime));
+
+  ctx.assert(
+    timeLater(schedule.endTime, schedule.startTime),
+    400,
+    "StartTimed"
+  );
 
   // Check if overlaps with other schedules
   const originalSchedules = await Schedule.findAll({ where: { UserId } });
