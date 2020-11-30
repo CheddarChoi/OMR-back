@@ -29,8 +29,6 @@ exports.create = async (ctx) => {
     UserId: UserId,
   };
 
-  console.log("hi" + timeLater(schedule.endTime, schedule.startTime));
-
   ctx.assert(
     timeLater(schedule.endTime, schedule.startTime),
     400,
